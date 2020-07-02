@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import getValidationErrors from '../../util/getValidationErrors';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import api from '../../services/api';
 
 import { Container, Title, BackToSignIn, BackToSignInText } from './styles';
 
@@ -49,6 +50,12 @@ const SignUp: React.FC = () => {
       await schema.validate(data, {
         abortEarly: false,
       });
+
+      await api.post('users', data);
+
+      Alert.alert('New account successfully created', 'You can already log in');
+
+      navigation.goBack();
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const errors = getValidationErrors(err);
