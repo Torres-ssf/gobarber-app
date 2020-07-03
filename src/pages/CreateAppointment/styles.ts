@@ -14,6 +14,11 @@ interface ProviderNameProps {
 
 interface HourProps {
   available: boolean;
+  selected: boolean;
+}
+
+interface HourTextProps {
+  selected: boolean;
 }
 
 export const Container = styled.View`
@@ -124,16 +129,16 @@ export const SectionContent = styled.ScrollView.attrs({
 })``;
 
 export const Hour = styled(RectButton)<HourProps>`
-  background: #3e3b47;
+  background: ${({ selected }) => (selected ? '#ff9000' : '#3e3b47')};
   padding: 12px;
   border-radius: 10px;
   margin-right: 8px;
 
-  opacity: ${props => (props.available ? 1 : 0.3)};
+  opacity: ${({ available }) => (available ? 1 : 0.3)};
 `;
 
-export const HourText = styled.Text`
-  color: #f4ede8;
+export const HourText = styled.Text<HourTextProps>`
+  color: ${({ selected }) => (selected ? '#232129' : '#f4ede8')};
   font-family: 'RobotoSlab-Regular';
   font-size: 16px;
 `;
