@@ -1,15 +1,106 @@
-import React from 'react';
-import { View, Button } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {} from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../hooks/auth';
-import { Container } from './styles';
+import api from '../../services/api';
+
+import {
+  Container,
+  Header,
+  HeaderTitle,
+  UserName,
+  ProfileButton,
+  UseAvatar,
+  ProvidersList,
+  ProviderContainer,
+  ProviderAvatar,
+  ProviderInfo,
+  ProviderName,
+  ProviderMeta,
+  ProviderMetaText,
+  ProviderListTitle,
+} from './styles';
+
+export interface Provider {
+  id: string;
+  name: string;
+  avatar_url: string;
+}
 
 const Dashboard: React.FC = () => {
-  const { signOut } = useAuth();
+  const [providers, setProviders] = useState<Provider[]>([]);
+
+  const { user, signOut } = useAuth();
+  const { navigate } = useNavigation();
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const res = await api.get('providers');
+
+        setProviders(res.data);
+
+        // signOut();
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchProviders();
+  }, []);
+
+  const navigateToProfile = useCallback(() => {
+    navigate('Profile');
+  }, [navigate]);
+
+  const navigateToCreateAppointment = useCallback(
+    (providerId: string) => {
+      navigate('CreateAppointment', { providerId });
+    },
+    [navigate],
+  );
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center' }}>
-      <Button title="Logout" onPress={signOut} />
-    </View>
+    <Container>
+      <Header>
+        <HeaderTitle>
+          Bem vindo,
+          {'\n'}
+          <UserName>{user.name}</UserName>
+        </HeaderTitle>
+
+        <ProfileButton onPress={navigateToProfile}>
+          <UseAvatar source={{ uri: user.avatar_url }} />
+        </ProfileButton>
+      </Header>
+
+      <ProvidersList
+        data={providers}
+        keyExtractor={provider => provider.id}
+        ListHeaderComponent={<ProviderListTitle>Barbers</ProviderListTitle>}
+        renderItem={({ item: provider }) => (
+          <ProviderContainer
+            onPress={() => navigateToCreateAppointment(provider.id)}
+          >
+            <ProviderAvatar source={{ uri: provider.avatar_url }} />
+            <ProviderInfo>
+              <ProviderName>{provider.name}</ProviderName>
+
+              <ProviderMeta>
+                <Icon name="calendar" size={14} color="#ff9000" />
+                <ProviderMetaText>From Monday through Friday</ProviderMetaText>
+              </ProviderMeta>
+
+              <ProviderMeta>
+                <Icon name="clock" size={14} color="#ff9000" />
+                <ProviderMetaText>From 8 through 18</ProviderMetaText>
+              </ProviderMeta>
+            </ProviderInfo>
+          </ProviderContainer>
+        )}
+      />
+    </Container>
   );
 };
 
