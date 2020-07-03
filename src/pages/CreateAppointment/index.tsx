@@ -10,6 +10,11 @@ import {
   BackButton,
   HeaderTitle,
   UserAvatar,
+  ProvidersList,
+  ProvidersListContainer,
+  ProviderName,
+  ProviderAvatar,
+  ProviderContainer,
 } from './styles';
 
 interface RouteParams {
@@ -23,17 +28,40 @@ export interface Provider {
 }
 
 const CreateAppointment: React.FC = () => {
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const route = useRoute();
+  const routeParams = route.params as RouteParams;
 
-  const { providerId } = route.params as RouteParams;
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [selectedProvider, setSelectedProvider] = useState(
+    routeParams.providerId,
+  );
 
   const { user } = useAuth();
   const { goBack } = useNavigation();
-  const route = useRoute();
 
   const navigateBack = useCallback(() => {
     goBack();
   }, [goBack]);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const res = await api.get('providers');
+
+        setProviders(res.data);
+
+        // signOut();
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchProviders();
+  }, []);
+
+  const handleSelectProvider = useCallback((providerId: string) => {
+    setSelectedProvider(providerId);
+  }, []);
 
   return (
     <Container>
@@ -45,6 +73,26 @@ const CreateAppointment: React.FC = () => {
         <HeaderTitle>Barbers</HeaderTitle>
         <UserAvatar source={{ uri: user.avatar_url }} />
       </Header>
+
+      <ProvidersListContainer>
+        <ProvidersList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={providers}
+          keyExtractor={provider => provider.id}
+          renderItem={({ item: provider }) => (
+            <ProviderContainer
+              onPress={() => handleSelectProvider(provider.id)}
+              selected={provider.id === selectedProvider}
+            >
+              <ProviderAvatar source={{ uri: provider.avatar_url }} />
+              <ProviderName selected={provider.id === selectedProvider}>
+                {provider.name}
+              </ProviderName>
+            </ProviderContainer>
+          )}
+        />
+      </ProvidersListContainer>
     </Container>
   );
 };
