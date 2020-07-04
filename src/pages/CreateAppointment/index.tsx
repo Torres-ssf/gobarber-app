@@ -63,7 +63,7 @@ const CreateAppointment: React.FC = () => {
   );
 
   const { user } = useAuth();
-  const { goBack, navigate } = useNavigation();
+  const { goBack, navigate, reset } = useNavigation();
 
   const navigateBack = useCallback(() => {
     goBack();
@@ -139,14 +139,20 @@ const CreateAppointment: React.FC = () => {
 
       await api.post('appointments', { provider_id: selectedProvider, date });
 
-      navigate('AppointmentCreated', { date: date.getTime() });
+      reset({
+        routes: [
+          { name: 'Dashboard' },
+          { name: 'AppointmentCreated', params: { date: date.getTime() } },
+        ],
+        index: 1,
+      });
     } catch (err) {
       Alert.alert(
         'Error while creating appointment',
         'An error has occurred while trying to create a new appointment, please try again',
       );
     }
-  }, [selectedDate, selectedHour, selectedProvider, navigate]);
+  }, [selectedDate, selectedHour, selectedProvider, reset]);
 
   const morningAvailability = useMemo(() => {
     return availability
