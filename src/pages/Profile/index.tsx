@@ -30,12 +30,12 @@ interface ProfileFormData {
   name: string;
   email: string;
   old_password: string;
-  password?: string;
-  password_confirmation?: string;
+  password: string;
+  password_confirmation: string;
 }
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const formRef = useRef<FormHandles>(null);
   const navigation = useNavigation();
@@ -44,6 +44,79 @@ const Profile: React.FC = () => {
   const OldPasswordInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const ConfirmPasswordInputRef = useRef<TextInput>(null);
+
+  const handleSignUp = useCallback(
+    async (data: ProfileFormData) => {
+      try {
+        formRef.current?.setErrors({});
+
+        const schema = Yup.object().shape({
+          name: Yup.string().required('Name is required'),
+          email: Yup.string()
+            .required('E-mail is required.')
+            .email('Must be a valid e-mail.'),
+          old_password: Yup.string(),
+          password: Yup.string().when('old_password', {
+            is: val => !!val,
+            then: Yup.string().min(6),
+            otherwise: Yup.string(),
+          }),
+          password_confirmation: Yup.string()
+            .when('old_password', {
+              is: val => !!val,
+              then: Yup.string().required(),
+              otherwise: Yup.string(),
+            })
+            .oneOf(
+              [Yup.ref('password'), undefined],
+              'Password confirmation does not match with password',
+            ),
+        });
+
+        await schema.validate(data, {
+          abortEarly: false,
+        });
+
+        const {
+          name,
+          email,
+          old_password,
+          password,
+          password_confirmation,
+        } = data;
+
+        const formData = {
+          name,
+          email,
+          ...(old_password
+            ? { old_password, password, password_confirmation }
+            : {}),
+        };
+
+        const res = await api.put('profile', formData);
+
+        updateUser(res.data);
+
+        Alert.alert('Profile successfully updated');
+
+        navigation.goBack();
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+
+          formRef.current?.setErrors(errors);
+
+          return;
+        }
+
+        Alert.alert(
+          'Profile updating error',
+          'An error occurred while trying to update your account, please try again',
+        );
+      }
+    },
+    [navigation, updateUser],
+  );
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -71,7 +144,12 @@ const Profile: React.FC = () => {
               <Title>My profile</Title>
             </View>
 
-            <Form style={{ width: '100%' }} ref={formRef} onSubmit={() => {}}>
+            <Form
+              style={{ width: '100%' }}
+              ref={formRef}
+              onSubmit={handleSignUp}
+              initialData={user}
+            >
               <Input
                 autoCapitalize="words"
                 name="name"
