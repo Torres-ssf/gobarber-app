@@ -62,8 +62,8 @@ const CreateAppointment: React.FC = () => {
     routeParams.providerId,
   );
 
-  const { user } = useAuth();
-  const { goBack, navigate, reset } = useNavigation();
+  const { user, signOut } = useAuth();
+  const { goBack, reset } = useNavigation();
 
   const navigateBack = useCallback(() => {
     goBack();
@@ -75,15 +75,19 @@ const CreateAppointment: React.FC = () => {
         const res = await api.get('providers');
 
         setProviders(res.data);
-
-        // signOut();
       } catch (err) {
-        console.log(err);
+        if (err.response.status === 401) {
+          signOut();
+          Alert.alert(
+            'Session expired',
+            'Your session has expired, please sign in again',
+          );
+        }
       }
     };
 
     fetchProviders();
-  }, []);
+  }, [signOut]);
 
   useEffect(() => {
     const fetchDailyDate = async () => {
@@ -106,7 +110,7 @@ const CreateAppointment: React.FC = () => {
     };
 
     fetchDailyDate();
-  }, [selectedDate, selectedProvider]);
+  }, [selectedDate, selectedProvider, signOut]);
 
   const handleSelectProvider = useCallback((providerId: string) => {
     setSelectedProvider(providerId);
@@ -131,6 +135,14 @@ const CreateAppointment: React.FC = () => {
   }, []);
 
   const handleCreateAppoinment = useCallback(async () => {
+    if (selectedHour === 0) {
+      Alert.alert(
+        'Select time slot',
+        'Please select an available time slot to create an appointment',
+      );
+
+      return;
+    }
     try {
       const date = new Date(selectedDate);
 
