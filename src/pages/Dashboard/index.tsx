@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {} from 'react-native';
+import { Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../hooks/auth';
@@ -40,15 +40,19 @@ const Dashboard: React.FC = () => {
         const res = await api.get('providers');
 
         setProviders(res.data);
-
-        // signOut();
       } catch (err) {
-        console.log(err);
+        if (err.response.status === 401) {
+          signOut();
+          Alert.alert(
+            'Session expired',
+            'Your session has expired, please sign in again',
+          );
+        }
       }
     };
 
     fetchProviders();
-  }, []);
+  }, [signOut]);
 
   const navigateToProfile = useCallback(() => {
     navigate('Profile');
