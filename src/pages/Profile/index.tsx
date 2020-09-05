@@ -7,6 +7,7 @@ import {
   ScrollView,
   Platform,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Form } from '@unform/mobile';
@@ -23,8 +24,8 @@ import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
+  Header,
   Title,
-  BackButton,
   AvatarContainer,
   UserAvatarButton,
   UserAvatar,
@@ -39,7 +40,7 @@ interface ProfileFormData {
 }
 
 const Profile: React.FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, signOut } = useAuth();
 
   const formRef = useRef<FormHandles>(null);
   const navigation = useNavigation();
@@ -160,6 +161,10 @@ const Profile: React.FC = () => {
     navigation.goBack();
   }, [navigation]);
 
+  const handleSignOut = useCallback(() => {
+    signOut();
+  }, [signOut]);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -169,9 +174,14 @@ const Profile: React.FC = () => {
       >
         <ScrollView keyboardShouldPersistTaps="handled">
           <Container>
-            <BackButton onPress={handleGoBack}>
-              <Icon name="chevron-left" size={24} color="#999591" />
-            </BackButton>
+            <Header>
+              <TouchableOpacity onPress={handleGoBack}>
+                <Icon name="chevron-left" size={24} color="#999591" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSignOut}>
+                <Icon name="log-out" size={24} color="#FF9000" />
+              </TouchableOpacity>
+            </Header>
 
             <AvatarContainer>
               <UserAvatar
