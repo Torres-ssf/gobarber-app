@@ -76,7 +76,7 @@ const SignIn: React.FC = () => {
         if (err.message && err.message === 'Network Error') {
           Alert.alert(
             'Account creation error',
-            'An error occurred while trying to create new account, check your network connection',
+            'An error occurred while trying log in, check your network connection',
           );
 
           return;
