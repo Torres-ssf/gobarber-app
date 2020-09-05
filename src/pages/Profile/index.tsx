@@ -25,6 +25,7 @@ import {
   Container,
   Title,
   BackButton,
+  AvatarContainer,
   UserAvatarButton,
   UserAvatar,
 } from './styles';
@@ -140,8 +141,6 @@ const Profile: React.FC = () => {
           return;
         }
 
-        console.log(response.uri);
-
         const data = new FormData();
 
         data.append('avatar', {
@@ -173,7 +172,8 @@ const Profile: React.FC = () => {
             <BackButton onPress={handleGoBack}>
               <Icon name="chevron-left" size={24} color="#999591" />
             </BackButton>
-            <UserAvatarButton onPress={handleUpdateAvatar}>
+
+            <AvatarContainer>
               <UserAvatar
                 source={{
                   uri: user.avatar_url
@@ -181,7 +181,11 @@ const Profile: React.FC = () => {
                     : Image.resolveAssetSource(avatarPlaceholderImage).uri,
                 }}
               />
-            </UserAvatarButton>
+              <UserAvatarButton onPress={handleUpdateAvatar}>
+                <Icon name="camera" size={24} color="#312E38" />
+              </UserAvatarButton>
+            </AvatarContainer>
+
             <View>
               <Title>My profile</Title>
             </View>

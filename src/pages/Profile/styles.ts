@@ -19,8 +19,25 @@ export const BackButton = styled.TouchableOpacity`
   margin-top: 40px;
 `;
 
+export const AvatarContainer = styled.View`
+  margin-top: 24px;
+  position: relative;
+  width: 186px;
+  height: 186px;
+  border-radius: 98px;
+  align-self: center;
+`;
+
 export const UserAvatarButton = styled.TouchableOpacity`
-  margin-top: 32px;
+  border-radius: 25px;
+  position: absolute;
+  height: 50px;
+  width: 50px;
+  bottom: 0;
+  right: 0;
+  justify-content: center;
+  align-items: center;
+  background: #ff9000;
 `;
 
 export const UserAvatar = styled.Image`
