@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from 'react';
 import {
   Alert,
   View,
+  Image,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -18,6 +19,7 @@ import getValidationErrors from '../../util/getValidationErrors';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import api from '../../services/api';
+import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
@@ -46,7 +48,7 @@ const Profile: React.FC = () => {
   const passwordInputRef = useRef<TextInput>(null);
   const ConfirmPasswordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback(
+  const handleProfileUpdate = useCallback(
     async (data: ProfileFormData) => {
       try {
         formRef.current?.setErrors({});
@@ -138,6 +140,8 @@ const Profile: React.FC = () => {
           return;
         }
 
+        console.log(response.uri);
+
         const data = new FormData();
 
         data.append('avatar', {
@@ -170,7 +174,13 @@ const Profile: React.FC = () => {
               <Icon name="chevron-left" size={24} color="#999591" />
             </BackButton>
             <UserAvatarButton onPress={handleUpdateAvatar}>
-              <UserAvatar source={{ uri: user.avatar_url }} />
+              <UserAvatar
+                source={{
+                  uri: user.avatar_url
+                    ? user.avatar_url
+                    : Image.resolveAssetSource(avatarPlaceholderImage).uri,
+                }}
+              />
             </UserAvatarButton>
             <View>
               <Title>My profile</Title>
@@ -179,7 +189,7 @@ const Profile: React.FC = () => {
             <Form
               style={{ width: '100%' }}
               ref={formRef}
-              onSubmit={handleSignUp}
+              onSubmit={handleProfileUpdate}
               initialData={user}
             >
               <Input
