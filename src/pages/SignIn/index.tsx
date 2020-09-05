@@ -73,6 +73,15 @@ const SignIn: React.FC = () => {
           return;
         }
 
+        if (err.message && err.message === 'Network Error') {
+          Alert.alert(
+            'Account creation error',
+            'An error occurred while trying to create new account, check your network connection',
+          );
+
+          return;
+        }
+
         Alert.alert(
           'Authentication error',
           'An error occurred while trying to authenticate, please try again',
