@@ -146,7 +146,6 @@ const Profile: React.FC = () => {
         }
 
         if (response.error) {
-          console.log(response.error);
           Alert.alert('Error while trying to update your profile image');
           return;
         }
