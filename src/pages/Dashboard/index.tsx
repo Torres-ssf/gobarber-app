@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { Alert, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
+import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
@@ -65,6 +66,16 @@ const Dashboard: React.FC = () => {
     [navigate],
   );
 
+  const { resolveAssetSource } = Image;
+
+  const userAvatar = useMemo(
+    () =>
+      user.avatar_url
+        ? user.avatar_url
+        : resolveAssetSource(avatarPlaceholderImage).uri,
+    [user, resolveAssetSource],
+  );
+
   return (
     <Container>
       <Header>
@@ -75,7 +86,7 @@ const Dashboard: React.FC = () => {
         </HeaderTitle>
 
         <ProfileButton onPress={navigateToProfile}>
-          <UseAvatar source={{ uri: user.avatar_url }} />
+          <UseAvatar source={{ uri: userAvatar }} />
         </ProfileButton>
       </Header>
 
@@ -87,7 +98,13 @@ const Dashboard: React.FC = () => {
           <ProviderContainer
             onPress={() => navigateToCreateAppointment(provider.id)}
           >
-            <ProviderAvatar source={{ uri: provider.avatar_url }} />
+            <ProviderAvatar
+              source={{
+                uri: provider.avatar_url
+                  ? provider.avatar_url
+                  : resolveAssetSource(avatarPlaceholderImage).uri,
+              }}
+            />
             <ProviderInfo>
               <ProviderName>{provider.name}</ProviderName>
 
