@@ -49,6 +49,13 @@ const Dashboard: React.FC = () => {
             'Your session has expired, please sign in again',
           );
         }
+
+        if (err.message && err.message === 'Network Error') {
+          Alert.alert(
+            'Account creation error',
+            'An error occurred while trying to get providers list, check your network connection',
+          );
+        }
       }
     };
 
