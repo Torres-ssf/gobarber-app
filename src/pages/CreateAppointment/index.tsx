@@ -4,10 +4,11 @@ import { format } from 'date-fns';
 import Icon from 'react-native-vector-icons/Feather';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { Platform, Alert } from 'react-native';
+import { Platform, Image, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
+import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
@@ -187,6 +188,15 @@ const CreateAppointment: React.FC = () => {
       }));
   }, [availability]);
 
+  const { resolveAssetSource } = Image;
+  const userAvatar = useMemo(
+    () =>
+      user.avatar_url
+        ? user.avatar_url
+        : resolveAssetSource(avatarPlaceholderImage).uri,
+    [user, resolveAssetSource],
+  );
+
   return (
     <Container>
       <Header>
@@ -195,7 +205,7 @@ const CreateAppointment: React.FC = () => {
         </BackButton>
 
         <HeaderTitle>Barbers</HeaderTitle>
-        <UserAvatar source={{ uri: user.avatar_url }} />
+        <UserAvatar source={{ uri: userAvatar }} />
       </Header>
 
       <ScrollView keyboardShouldPersistTaps="handled">
@@ -211,7 +221,13 @@ const CreateAppointment: React.FC = () => {
                   onPress={() => handleSelectProvider(provider.id)}
                   selected={provider.id === selectedProvider}
                 >
-                  <ProviderAvatar source={{ uri: provider.avatar_url }} />
+                  <ProviderAvatar
+                    source={{
+                      uri: provider.avatar_url
+                        ? provider.avatar_url
+                        : resolveAssetSource(avatarPlaceholderImage).uri,
+                    }}
+                  />
                   <ProviderName selected={provider.id === selectedProvider}>
                     {provider.name}
                   </ProviderName>
