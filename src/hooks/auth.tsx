@@ -4,14 +4,18 @@ import React, {
   useState,
   useContext,
   useEffect,
+  useMemo,
 } from 'react';
 import AsyncStorage from '@react-native-community/async-storage';
+import { API_HOST_ANDROID, APP_ENV } from 'react-native-dotenv';
+import { Platform } from 'react-native';
 import api from '../services/api';
 
 interface User {
   id: string;
   name: string;
   email: string;
+  avatar: string;
   avatar_url: string;
 }
 
@@ -27,6 +31,7 @@ interface SignInCredentials {
 
 interface AuthContextData {
   user: User;
+  userAvatar: string | undefined;
   loading: boolean;
   signIn(credentials: SignInCredentials): Promise<void>;
   signOut(): void;
@@ -90,9 +95,28 @@ const AuthProvider: React.FC = ({ children }) => {
     [setData],
   );
 
+  const avatarUrl = useMemo(() => {
+    if (data.user && data.user.avatar_url) {
+      if (APP_ENV === 'prod' || Platform.OS === 'ios') {
+        return data.user.avatar_url;
+      }
+
+      return `${API_HOST_ANDROID}/files/${data.user.avatar}`;
+    }
+
+    return undefined;
+  }, [data.user]);
+
   return (
     <AuthContext.Provider
-      value={{ user: data.user, loading, signIn, signOut, updateUser }}
+      value={{
+        user: data.user,
+        userAvatar: avatarUrl,
+        loading,
+        signIn,
+        signOut,
+        updateUser,
+      }}
     >
       {children}
     </AuthContext.Provider>
