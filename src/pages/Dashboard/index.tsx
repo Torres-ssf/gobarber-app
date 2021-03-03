@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { Alert, Image } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import { Avatar } from 'react-native-paper';
+import { API_HOST_ANDROID, APP_ENV } from 'react-native-dotenv';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
-import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
@@ -26,13 +27,14 @@ import {
 export interface Provider {
   id: string;
   name: string;
+  avatar: string;
   avatar_url: string;
 }
 
 const Dashboard: React.FC = () => {
   const [providers, setProviders] = useState<Provider[]>([]);
 
-  const { user, signOut } = useAuth();
+  const { user, userAvatar, signOut } = useAuth();
   const { navigate } = useNavigation();
 
   useEffect(() => {
@@ -73,15 +75,13 @@ const Dashboard: React.FC = () => {
     [navigate],
   );
 
-  const { resolveAssetSource } = Image;
+  const userAvatarView = useMemo(() => {
+    if (userAvatar) {
+      return <UseAvatar source={{ uri: userAvatar }} />;
+    }
 
-  const userAvatar = useMemo(
-    () =>
-      user.avatar_url
-        ? user.avatar_url
-        : resolveAssetSource(avatarPlaceholderImage).uri,
-    [user, resolveAssetSource],
-  );
+    return <Avatar.Text size={48} label={user.name[0]} />;
+  }, [user, userAvatar]);
 
   return (
     <Container>
@@ -93,7 +93,7 @@ const Dashboard: React.FC = () => {
         </HeaderTitle>
 
         <ProfileButton onPress={navigateToProfile}>
-          <UseAvatar source={{ uri: userAvatar }} />
+          {userAvatarView}
         </ProfileButton>
       </Header>
 
@@ -105,13 +105,19 @@ const Dashboard: React.FC = () => {
           <ProviderContainer
             onPress={() => navigateToCreateAppointment(provider.id)}
           >
-            <ProviderAvatar
-              source={{
-                uri: provider.avatar_url
-                  ? provider.avatar_url
-                  : resolveAssetSource(avatarPlaceholderImage).uri,
-              }}
-            />
+            {provider.avatar_url ? (
+              <ProviderAvatar
+                source={{
+                  uri:
+                    APP_ENV === 'prod' || Platform.OS === 'ios'
+                      ? provider.avatar_url
+                      : `${API_HOST_ANDROID}/files/${provider.avatar}`,
+                }}
+              />
+            ) : (
+              <Avatar.Text size={72} label={provider.name[0]} />
+            )}
+
             <ProviderInfo>
               <ProviderName>{provider.name}</ProviderName>
 
