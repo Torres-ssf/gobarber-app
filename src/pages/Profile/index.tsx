@@ -1,8 +1,7 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Alert,
   View,
-  Image,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
@@ -15,12 +14,12 @@ import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Feather';
 import ImagePicker from 'react-native-image-picker';
+import { Avatar } from 'react-native-paper';
 import { useAuth } from '../../hooks/auth';
 import getValidationErrors from '../../util/getValidationErrors';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import api from '../../services/api';
-import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
@@ -40,7 +39,7 @@ interface ProfileFormData {
 }
 
 const Profile: React.FC = () => {
-  const { user, updateUser, signOut } = useAuth();
+  const { user, userAvatar, updateUser, signOut } = useAuth();
 
   const formRef = useRef<FormHandles>(null);
   const navigation = useNavigation();
@@ -173,6 +172,20 @@ const Profile: React.FC = () => {
     signOut();
   }, [signOut]);
 
+  const userAvatarView = useMemo(() => {
+    if (userAvatar) {
+      return (
+        <UserAvatar
+          source={{
+            uri: userAvatar,
+          }}
+        />
+      );
+    }
+
+    return <Avatar.Text size={186} label={user.name[0]} />;
+  }, [user.name, userAvatar]);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -192,13 +205,7 @@ const Profile: React.FC = () => {
             </Header>
 
             <AvatarContainer>
-              <UserAvatar
-                source={{
-                  uri: user.avatar_url
-                    ? user.avatar_url
-                    : Image.resolveAssetSource(avatarPlaceholderImage).uri,
-                }}
-              />
+              {userAvatarView}
               <UserAvatarButton onPress={handleUpdateAvatar}>
                 <Icon name="camera" size={22} color="#312E38" />
               </UserAvatarButton>
