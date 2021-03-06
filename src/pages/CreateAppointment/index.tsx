@@ -2,13 +2,14 @@ import React, { useEffect, useCallback, useState, useMemo } from 'react';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { format } from 'date-fns';
 import Icon from 'react-native-vector-icons/Feather';
+import { Avatar } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import { Platform, Image, Alert } from 'react-native';
+import { Platform, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { API_HOST_ANDROID, APP_ENV } from 'react-native-dotenv';
 import { useAuth } from '../../hooks/auth';
 import api from '../../services/api';
-import avatarPlaceholderImage from '../../assets/avatar-placeholder.png';
 
 import {
   Container,
@@ -43,6 +44,7 @@ interface RouteParams {
 export interface Provider {
   id: string;
   name: string;
+  avatar: string;
   avatar_url: string;
 }
 
@@ -64,7 +66,7 @@ const CreateAppointment: React.FC = () => {
     routeParams.providerId,
   );
 
-  const { user, signOut } = useAuth();
+  const { user, userAvatar, signOut } = useAuth();
   const { goBack, reset } = useNavigation();
 
   const navigateBack = useCallback(() => {
@@ -195,14 +197,22 @@ const CreateAppointment: React.FC = () => {
       }));
   }, [availability]);
 
-  const { resolveAssetSource } = Image;
-  const userAvatar = useMemo(
-    () =>
-      user.avatar_url
-        ? user.avatar_url
-        : resolveAssetSource(avatarPlaceholderImage).uri,
-    [user, resolveAssetSource],
-  );
+  const userAvatarView = useMemo(() => {
+    if (userAvatar) {
+      return (
+        <UserAvatar
+          source={{
+            uri:
+              APP_ENV === 'prod' || Platform.OS === 'ios'
+                ? userAvatar
+                : `${API_HOST_ANDROID}/files/${user.avatar}`,
+          }}
+        />
+      );
+    }
+
+    return <Avatar.Text size={48} label={user.name[0]} />;
+  }, [user, userAvatar]);
 
   return (
     <Container>
@@ -212,7 +222,7 @@ const CreateAppointment: React.FC = () => {
         </BackButton>
 
         <HeaderTitle>Barbers</HeaderTitle>
-        <UserAvatar source={{ uri: userAvatar }} />
+        {userAvatarView}
       </Header>
 
       <ScrollView keyboardShouldPersistTaps="handled">
@@ -228,13 +238,18 @@ const CreateAppointment: React.FC = () => {
                   onPress={() => handleSelectProvider(provider.id)}
                   selected={provider.id === selectedProvider}
                 >
-                  <ProviderAvatar
-                    source={{
-                      uri: provider.avatar_url
-                        ? provider.avatar_url
-                        : resolveAssetSource(avatarPlaceholderImage).uri,
-                    }}
-                  />
+                  {provider.avatar_url ? (
+                    <ProviderAvatar
+                      source={{
+                        uri:
+                          APP_ENV === 'prod' || Platform.OS === 'ios'
+                            ? provider.avatar_url
+                            : `${API_HOST_ANDROID}/files/${provider.avatar}`,
+                      }}
+                    />
+                  ) : (
+                    <Avatar.Text size={32} label={provider.name[0]} />
+                  )}
                   <ProviderName selected={provider.id === selectedProvider}>
                     {provider.name}
                   </ProviderName>
