@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 export const Container = styled.View`
   flex: 1;
   justify-content: center;
-  padding: 0 30px ${Platform.OS === 'android' ? 150 : 40}px;
+  padding: 0 30px ${Platform.OS === 'android' ? 30 : 40}px;
   position: relative;
 `;
 
@@ -15,12 +15,32 @@ export const Title = styled.Text`
   margin: 24px 0 24px;
 `;
 
-export const BackButton = styled.TouchableOpacity`
-  margin-top: 40px;
+export const Header = styled.View`
+  margin-top: 50px;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row;
+`;
+
+export const AvatarContainer = styled.View`
+  margin-top: 20px;
+  position: relative;
+  width: 186px;
+  height: 186px;
+  border-radius: 98px;
+  align-self: center;
 `;
 
 export const UserAvatarButton = styled.TouchableOpacity`
-  margin-top: 32px;
+  border-radius: 25px;
+  position: absolute;
+  height: 50px;
+  width: 50px;
+  bottom: 0;
+  right: 0;
+  justify-content: center;
+  align-items: center;
+  background: #ff9000;
 `;
 
 export const UserAvatar = styled.Image`

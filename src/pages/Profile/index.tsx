@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import {
   Alert,
   View,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   Platform,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Form } from '@unform/mobile';
@@ -13,6 +14,7 @@ import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 import Icon from 'react-native-vector-icons/Feather';
 import ImagePicker from 'react-native-image-picker';
+import { Avatar } from 'react-native-paper';
 import { useAuth } from '../../hooks/auth';
 import getValidationErrors from '../../util/getValidationErrors';
 import Button from '../../components/Button';
@@ -21,8 +23,9 @@ import api from '../../services/api';
 
 import {
   Container,
+  Header,
   Title,
-  BackButton,
+  AvatarContainer,
   UserAvatarButton,
   UserAvatar,
 } from './styles';
@@ -36,7 +39,7 @@ interface ProfileFormData {
 }
 
 const Profile: React.FC = () => {
-  const { user, updateUser } = useAuth();
+  const { user, userAvatar, updateUser, signOut } = useAuth();
 
   const formRef = useRef<FormHandles>(null);
   const navigation = useNavigation();
@@ -46,7 +49,7 @@ const Profile: React.FC = () => {
   const passwordInputRef = useRef<TextInput>(null);
   const ConfirmPasswordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback(
+  const handleProfileUpdate = useCallback(
     async (data: ProfileFormData) => {
       try {
         formRef.current?.setErrors({});
@@ -110,6 +113,15 @@ const Profile: React.FC = () => {
           return;
         }
 
+        if (err.message && err.message === 'Network Error') {
+          Alert.alert(
+            'Account creation error',
+            'An error occurred while trying to update your infomation, check your network connection',
+          );
+
+          return;
+        }
+
         Alert.alert(
           'Profile updating error',
           'An error occurred while trying to update your account, please try again',
@@ -133,7 +145,6 @@ const Profile: React.FC = () => {
         }
 
         if (response.error) {
-          console.log(response.error);
           Alert.alert('Error while trying to update your profile image');
           return;
         }
@@ -157,6 +168,24 @@ const Profile: React.FC = () => {
     navigation.goBack();
   }, [navigation]);
 
+  const handleSignOut = useCallback(() => {
+    signOut();
+  }, [signOut]);
+
+  const userAvatarView = useMemo(() => {
+    if (userAvatar) {
+      return (
+        <UserAvatar
+          source={{
+            uri: userAvatar,
+          }}
+        />
+      );
+    }
+
+    return <Avatar.Text size={186} label={user.name[0]} />;
+  }, [user.name, userAvatar]);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -166,12 +195,22 @@ const Profile: React.FC = () => {
       >
         <ScrollView keyboardShouldPersistTaps="handled">
           <Container>
-            <BackButton onPress={handleGoBack}>
-              <Icon name="chevron-left" size={24} color="#999591" />
-            </BackButton>
-            <UserAvatarButton onPress={handleUpdateAvatar}>
-              <UserAvatar source={{ uri: user.avatar_url }} />
-            </UserAvatarButton>
+            <Header>
+              <TouchableOpacity onPress={handleGoBack}>
+                <Icon name="chevron-left" size={24} color="#999591" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleSignOut}>
+                <Icon name="log-out" size={24} color="#FF9000" />
+              </TouchableOpacity>
+            </Header>
+
+            <AvatarContainer>
+              {userAvatarView}
+              <UserAvatarButton onPress={handleUpdateAvatar}>
+                <Icon name="camera" size={22} color="#312E38" />
+              </UserAvatarButton>
+            </AvatarContainer>
+
             <View>
               <Title>My profile</Title>
             </View>
@@ -179,7 +218,7 @@ const Profile: React.FC = () => {
             <Form
               style={{ width: '100%' }}
               ref={formRef}
-              onSubmit={handleSignUp}
+              onSubmit={handleProfileUpdate}
               initialData={user}
             >
               <Input

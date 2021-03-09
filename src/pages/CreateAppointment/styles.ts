@@ -45,9 +45,9 @@ export const HeaderTitle = styled.Text`
 `;
 
 export const UserAvatar = styled.Image`
-  width: 56px;
-  height: 56px;
-  border-radius: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
   margin-left: auto;
 `;
 
